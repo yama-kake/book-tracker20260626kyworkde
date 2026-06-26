@@ -16,9 +16,14 @@
 
 ## 使っているデータソース（無料・APIキー不要）
 
-- [openBD](https://openbd.jp/) … 日本の書籍の書誌・書影（ISBN検索）
-- [Google Books API](https://developers.google.com/books) … タイトル・著者検索
+- [openBD](https://openbd.jp/) … 日本の書籍の書誌（ISBN検索の主データ）
+- [Google Books API](https://developers.google.com/books) … タイトル・著者検索の主データ
+- [国立国会図書館サーチ](https://ndlsearch.ndl.go.jp/) … Google Booksが使えない時のタイトル・著者検索の予備
+- [Open Library Covers](https://openlibrary.org/dev/docs/api/covers) … 書影が無いときの予備
 - [html5-qrcode](https://github.com/mebjas/html5-qrcode) … バーコード読み取り
+
+### 検索が「ほとんどヒットしない」場合について
+タイトル・著者検索は Google Books を主に使っています。Google Books はキー無しだと **同じIPからのアクセスが多いと一時的に制限（429）** されることがあり、特にモバイル回線（多数の利用者で同じIPを共有する）では出やすくなります。本アプリは Google が使えない時に**自動で国立国会図書館サーチに切り替える**ようにしてあるので、その場合でも日本語書籍はヒットします（ただし並び順は Google ほど賢くありません）。Wi-Fi 環境だと Google 側が安定しやすいです。
 
 ## GitHub Pages で公開する手順（誰でも使える状態にする）
 

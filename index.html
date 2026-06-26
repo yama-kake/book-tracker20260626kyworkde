@@ -333,6 +333,61 @@ function cleanAuthor(a){
     .trim();
 }
 
+// 国立国会図書館サーチ（CORS対応・キー不要）。Google Booksが使えない時の保険。
+// まずタイトルで検索し、0件なら著者名として再検索する。
+async function searchNDL(query){
+  let out = await ndlQuery('title', query);
+  if(!out.length) out = await ndlQuery('creator', query);   // 著者名で入力された場合の保険
+  // 並べ替え：日本のISBN優先 ＋ タイトル一致度（完全 > 前方 > 部分）
+  const score = (b)=>{
+    const t = b.title || '';
+    let s = isJpIsbn(b.isbn) ? 2 : 0;
+    if(t === query) s += 4;
+    else if(t.startsWith(query)) s += 2;
+    else if(t.includes(query)) s += 1;
+    return s;
+  };
+  out.sort((a,b)=> score(b) - score(a));
+  return out;
+}
+
+async function ndlQuery(field, query){
+  const ctrl = new AbortController();
+  const to = setTimeout(()=>ctrl.abort(), 10000);
+  let txt = '';
+  try{
+    // dpid=iss-ndl-opac で蔵書目録に限定（雑誌記事などのノイズを源流から除外）。
+    // cnt=20以上は共有IPだとスロットルされやすいので10に抑える。
+    const r = await fetch('https://ndlsearch.ndl.go.jp/api/opensearch?dpid=iss-ndl-opac&cnt=10&' + field + '=' + encodeURIComponent(query), {signal:ctrl.signal});
+    txt = await r.text();
+  } finally { clearTimeout(to); }
+
+  const items = txt.split('<item>').slice(1).map(s=> s.slice(0, s.indexOf('</item>')));
+  const pick = (x, tag) => { const m = x.match(new RegExp('<'+tag+'>([\\s\\S]*?)<\\/'+tag+'>')); return m ? unescapeXML(m[1].trim()) : ''; };
+  const out = [];
+  const seen = new Set();
+  items.forEach(x=>{
+    if(!/<category>図書<\/category>/.test(x)) return;           // 図書だけ（記事・録音資料などを除外）
+    const isbnRaw = (x.match(/dcndl:ISBN">([\dXx-]+)</)||[])[1];
+    const isbn = isbnRaw ? isbnRaw.replace(/[^0-9Xx]/g,'') : '';
+    if(!isbn) return;
+    if(seen.has(isbn)) return;
+    seen.add(isbn);
+    const creators = (x.match(/<dc:creator>([\s\S]*?)<\/dc:creator>/g)||[]).map(c=>unescapeXML(c.replace(/<\/?dc:creator>/g,'')));
+    out.push({
+      id: 'isbn:'+isbn,
+      title: pick(x,'dc:title') || '(タイトル不明)',
+      authors: cleanAuthor(creators.join('、')),
+      publisher: pick(x,'dc:publisher'),
+      published: pick(x,'dcterms:issued') || (x.match(/<pubDate>([\s\S]*?)<\/pubDate>/)||[])[1] || '',
+      cover: '', isbn, totalPages: 0
+    });
+  });
+  return out;
+}
+function isJpIsbn(i){ return /^9784/.test(i) || /^4/.test(i); }
+function unescapeXML(s){ return String(s).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&apos;/g,"'").replace(/&amp;/g,'&'); }
+
 async function searchGoogle(query){
   const url = 'https://www.googleapis.com/books/v1/volumes?country=JP&maxResults=20&q=' + encodeURIComponent(query);
   const r = await fetch(url);
@@ -370,7 +425,11 @@ async function doSearch(){
       const b = await lookupISBN(q);
       items = b ? [b] : [];
     }else{
-      items = await searchGoogle(q);
+      // まずGoogle Books（並び順が優秀）。0件や429のときは国会図書館サーチで補う。
+      try{ items = await searchGoogle(q); }catch(e){ items = []; }
+      if(!items.length){
+        try{ items = await searchNDL(q); }catch(e){ items = []; }
+      }
     }
     if(!items.length){ resultsEl.innerHTML = '<div class="empty">見つかりませんでした。別のキーワードでお試しください。</div>'; return; }
     resultsEl.innerHTML = items.map(b=>resultCard(b)).join('');
