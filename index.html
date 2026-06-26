@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#3b5b8c">
-<title>ブクログ風 読書管理</title>
+<title>読書管理</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
@@ -57,7 +57,6 @@
     cursor:pointer;background:var(--accent);color:#fff;white-space:nowrap;
   }
   .btn.scan{background:#2f7d6f}
-  .btn.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}
   .hint{font-size:12px;color:var(--sub);margin:0 2px 12px}
 
   /* 書影カード */
@@ -82,13 +81,25 @@
   .pill.reading{background:#d8efe9;color:#2c6b61}
   .pill.done{background:#dde6f3;color:#2d477a}
 
-  /* 本棚 */
-  .filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  /* 本棚操作 */
+  .shelf-tools{margin-bottom:12px}
+  .shelf-tools .row{display:flex;gap:8px;margin-bottom:8px}
+  .shelf-tools input.search{
+    flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff;
+  }
+  .shelf-tools select{
+    border:1px solid var(--line);border-radius:10px;padding:0 8px;font-size:13px;background:#fff;
+  }
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
   .filters button{
     border:1px solid var(--line);background:#fff;color:var(--sub);border-radius:20px;
     padding:7px 13px;font-size:13px;cursor:pointer;font-weight:600;
   }
   .filters button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tagfilter{margin:10px 0 0;font-size:13px;color:var(--sub);display:none;align-items:center;gap:8px}
+  .tagfilter.on{display:flex}
+  .tagfilter .clear{border:none;background:var(--accent);color:#fff;border-radius:14px;padding:4px 10px;font-size:12px;cursor:pointer}
+
   .status-tag{
     display:inline-block;font-size:11px;font-weight:700;border-radius:5px;
     padding:2px 7px;margin-bottom:4px;color:#fff;
@@ -99,10 +110,38 @@
   .stars{font-size:15px;letter-spacing:1px;color:#d9b94b;cursor:pointer;margin-top:4px}
   .stars span{opacity:.3}
   .stars span.on{opacity:1}
+
+  /* タグ */
+  .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+  .tag{
+    background:#eee7da;color:#6b5d3e;border:none;border-radius:14px;padding:3px 10px;
+    font-size:11.5px;cursor:pointer;font-weight:600;
+  }
+  .tag .x{margin-left:5px;opacity:.55}
+  .tag.add{background:#fff;border:1px dashed var(--line);color:var(--sub)}
+
+  /* 進捗バー */
+  .progress{margin-top:8px}
+  .progress .bar{height:7px;background:#e9e4da;border-radius:4px;overflow:hidden}
+  .progress .bar i{display:block;height:100%;background:var(--reading);border-radius:4px}
+  .progress .lbl{font-size:11.5px;color:var(--sub);margin-top:3px}
+
   .note{
     width:100%;margin-top:8px;border:1px solid var(--line);border-radius:8px;
     padding:8px;font-size:13px;font-family:inherit;resize:vertical;min-height:38px;background:#fff;
   }
+
+  details.rec{margin-top:8px}
+  details.rec summary{font-size:12.5px;color:var(--accent);cursor:pointer;font-weight:600;list-style:none}
+  details.rec summary::-webkit-details-marker{display:none}
+  details.rec summary::before{content:"▸ ";font-size:10px}
+  details.rec[open] summary::before{content:"▾ "}
+  .rec-grid{display:grid;grid-template-columns:auto 1fr;gap:7px 10px;align-items:center;margin-top:8px;font-size:13px}
+  .rec-grid label{color:var(--sub);font-size:12.5px}
+  .rec-grid input{border:1px solid var(--line);border-radius:7px;padding:6px 8px;font-size:13px;background:#fff;width:100%}
+  .rec-grid .pages{display:flex;align-items:center;gap:6px}
+  .rec-grid .pages input{width:70px}
+
   .row-actions{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap}
   .mini{font-size:12px;border:none;background:none;cursor:pointer;color:var(--sub);padding:4px}
   .mini.del{color:var(--danger)}
@@ -113,10 +152,24 @@
   .empty{text-align:center;color:var(--sub);padding:40px 20px;font-size:14px;line-height:1.7}
   .loading{text-align:center;color:var(--sub);padding:24px;font-size:14px}
 
-  .stats{display:flex;gap:8px;margin-bottom:14px}
-  .stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+  /* 統計タブ */
+  .stats{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .stat{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
   .stat .n{font-size:22px;font-weight:800;color:var(--accent)}
   .stat .l{font-size:11px;color:var(--sub);margin-top:2px}
+  .card-box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+  .card-box h3{margin:0 0 12px;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+  .card-box h3 select{border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:13px;background:#fff}
+  .chart{display:flex;align-items:flex-end;gap:5px;height:140px;padding-top:6px}
+  .chart .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .chart .col .v{font-size:11px;color:var(--sub);margin-bottom:2px;height:14px}
+  .chart .col .b{width:100%;max-width:26px;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px;transition:height .3s}
+  .chart .col .m{font-size:10px;color:var(--sub);margin-top:4px}
+  .goal{margin-top:4px}
+  .goal .bar{height:12px;background:#e9e4da;border-radius:6px;overflow:hidden}
+  .goal .bar i{display:block;height:100%;background:var(--done);border-radius:6px}
+  .goal .row{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px}
+  .goal input{width:60px;border:1px solid var(--line);border-radius:7px;padding:5px 7px;font-size:13px}
 
   /* スキャナモーダル */
   .modal{
@@ -149,19 +202,47 @@
 <main>
   <div class="tabs">
     <button class="active" data-tab="shelf">本棚</button>
-    <button data-tab="add">本を追加</button>
+    <button data-tab="stats">記録</button>
+    <button data-tab="add">追加</button>
   </div>
 
   <!-- 本棚 -->
   <section class="panel active" id="panel-shelf">
-    <div class="stats" id="stats"></div>
-    <div class="filters" id="filters">
-      <button data-f="all" class="active">すべて</button>
-      <button data-f="want">読みたい</button>
-      <button data-f="reading">読書中</button>
-      <button data-f="done">読了</button>
+    <div class="shelf-tools">
+      <div class="row">
+        <input class="search" id="shelfSearch" type="search" placeholder="タイトル・著者・タグで絞り込み">
+        <select id="sortSel">
+          <option value="added">追加が新しい順</option>
+          <option value="rating">評価が高い順</option>
+          <option value="finished">読了日が新しい順</option>
+          <option value="title">タイトル順</option>
+        </select>
+      </div>
+      <div class="filters" id="filters">
+        <button data-f="all" class="active">すべて</button>
+        <button data-f="want">読みたい</button>
+        <button data-f="reading">読書中</button>
+        <button data-f="done">読了</button>
+      </div>
+      <div class="tagfilter" id="tagFilter">
+        <span>タグ：<b id="tagFilterName"></b></span>
+        <button class="clear" id="tagClear">解除</button>
+      </div>
     </div>
     <div id="shelfList"></div>
+  </section>
+
+  <!-- 記録（統計） -->
+  <section class="panel" id="panel-stats">
+    <div class="stats" id="statCards"></div>
+    <div class="card-box">
+      <h3>年間読書目標</h3>
+      <div class="goal" id="goalBox"></div>
+    </div>
+    <div class="card-box">
+      <h3>月別の読了冊数 <select id="yearSel"></select></h3>
+      <div class="chart" id="chart"></div>
+    </div>
   </section>
 
   <!-- 追加 -->
@@ -189,11 +270,20 @@
 <script>
 /* ============ データ層 ============ */
 const KEY = 'book-tracker-v1';
+const GOAL_KEY = 'book-tracker-goal';
 let books = load();
+let goal = parseInt(localStorage.getItem(GOAL_KEY) || '0', 10) || 0;
 
 function load(){
-  try{ return JSON.parse(localStorage.getItem(KEY)) || []; }
-  catch(e){ return []; }
+  let arr = [];
+  try{ arr = JSON.parse(localStorage.getItem(KEY)) || []; }catch(e){ arr = []; }
+  // 旧データに新フィールドを補完（マイグレーション）
+  return arr.map(b => ({
+    tags: [], startedAt: null, finishedAt: b.finishedAt || null,
+    currentPage: 0, totalPages: b.totalPages || 0,
+    ...b,
+    tags: Array.isArray(b.tags) ? b.tags : []
+  }));
 }
 function save(){ localStorage.setItem(KEY, JSON.stringify(books)); }
 
@@ -204,7 +294,6 @@ function toast(msg){
 }
 
 /* ============ 書籍検索API ============ */
-// ISBN → openBD（日本の本に強い）→ なければGoogle Books
 async function lookupISBN(isbn){
   isbn = isbn.replace(/[^0-9Xx]/g,'');
   try{
@@ -215,11 +304,10 @@ async function lookupISBN(isbn){
       return {
         id: 'isbn:'+isbn, title: s.title || '(タイトル不明)',
         authors: cleanAuthor(s.author), publisher: s.publisher || '',
-        published: s.pubdate || '', cover: s.cover || '', isbn
+        published: s.pubdate || '', cover: s.cover || '', isbn, totalPages: 0
       };
     }
   }catch(e){}
-  // フォールバック
   const g = await searchGoogle('isbn:' + isbn);
   return g[0] || null;
 }
@@ -228,9 +316,9 @@ async function lookupISBN(isbn){
 function cleanAuthor(a){
   if(!a) return '';
   return a
-    .replace(/\d{3,4}-\d{0,4}/g, '')      // 生没年を除去
-    .replace(/／[^／,、]*/g, '')            // ／著 ／訳 などの役割表記を除去
-    .replace(/[,，]/g, '')                  // 姓名区切りのカンマを除去
+    .replace(/\d{3,4}-\d{0,4}/g, '')
+    .replace(/／[^／,、]*/g, '')
+    .replace(/[,，]/g, '')
     .replace(/\s+/g, ' ')
     .replace(/[、･・]\s*$/,'')
     .trim();
@@ -253,14 +341,13 @@ async function searchGoogle(query){
       authors: (v.authors||[]).join('、'),
       publisher: v.publisher || '',
       published: v.publishedDate || '',
-      cover, isbn
+      cover, isbn, totalPages: v.pageCount || 0
     };
   });
 }
 
 /* ============ 検索UI ============ */
 const resultsEl = document.getElementById('results');
-
 document.getElementById('searchBtn').onclick = doSearch;
 document.getElementById('q').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
 
@@ -277,7 +364,7 @@ async function doSearch(){
       items = await searchGoogle(q);
     }
     if(!items.length){ resultsEl.innerHTML = '<div class="empty">見つかりませんでした。別のキーワードでお試しください。</div>'; return; }
-    resultsEl.innerHTML = items.map(b=>cardHTML(b, true)).join('');
+    resultsEl.innerHTML = items.map(b=>resultCard(b)).join('');
   }catch(e){
     resultsEl.innerHTML = '<div class="empty">通信エラーが発生しました。<br>電波の良い場所で再度お試しください。</div>';
   }
@@ -289,7 +376,7 @@ function coverHTML(b){
 }
 function noCover(){ const d=document.createElement('div'); d.className='cover'; d.innerHTML='No<br>Image'; return d; }
 
-function cardHTML(b, isResult){
+function resultCard(b){
   const enc = encodeURIComponent(JSON.stringify(b));
   return `<div class="book">
     ${coverHTML(b)}
@@ -306,13 +393,17 @@ function cardHTML(b, isResult){
   </div>`;
 }
 
+const today = () => new Date().toISOString().slice(0,10);
+
 window.addBook = function(enc, status){
   const b = JSON.parse(decodeURIComponent(enc));
   if(books.some(x=>x.id===b.id)){ toast('すでに本棚にあります'); switchTab('shelf'); return; }
   books.unshift({
-    ...b, status, rating:0, note:'',
+    ...b, status, rating:0, note:'', tags:[],
+    totalPages: b.totalPages || 0, currentPage: 0,
     addedAt: Date.now(),
-    finishedAt: status==='done'? Date.now() : null
+    startedAt: (status==='reading'||status==='done') ? today() : null,
+    finishedAt: status==='done' ? today() : null
   });
   save(); renderShelf();
   toast(status==='done'?'読了に追加しました 🎉':'本棚に追加しました');
@@ -321,6 +412,9 @@ window.addBook = function(enc, status){
 
 /* ============ 本棚UI ============ */
 let filter = 'all';
+let tagFilter = null;
+let sortBy = 'added';
+let searchText = '';
 const shelfList = document.getElementById('shelfList');
 
 document.getElementById('filters').addEventListener('click', e=>{
@@ -329,68 +423,182 @@ document.getElementById('filters').addEventListener('click', e=>{
   [...document.querySelectorAll('#filters button')].forEach(b=>b.classList.toggle('active', b===btn));
   renderShelf();
 });
+document.getElementById('sortSel').addEventListener('change', e=>{ sortBy = e.target.value; renderShelf(); });
+document.getElementById('shelfSearch').addEventListener('input', e=>{ searchText = e.target.value.trim().toLowerCase(); renderShelf(); });
+document.getElementById('tagClear').onclick = ()=>{ tagFilter = null; renderShelf(); };
+window.setTagFilter = (t)=>{ tagFilter = t; document.getElementById('shelfSearch').value=''; searchText=''; renderShelf(); switchTab('shelf'); };
 
 const STATUS_LABEL = {want:'読みたい', reading:'読書中', done:'読了'};
 
-function renderStats(){
-  const c = {want:0,reading:0,done:0};
-  books.forEach(b=>c[b.status]!==undefined && c[b.status]++);
-  document.getElementById('stats').innerHTML = `
-    <div class="stat"><div class="n">${c.want}</div><div class="l">読みたい</div></div>
-    <div class="stat"><div class="n">${c.reading}</div><div class="l">読書中</div></div>
-    <div class="stat"><div class="n">${c.done}</div><div class="l">読了</div></div>`;
+function sortBooks(list){
+  const a = [...list];
+  if(sortBy==='rating') a.sort((x,y)=> (y.rating||0)-(x.rating||0) || y.addedAt-x.addedAt);
+  else if(sortBy==='finished') a.sort((x,y)=> (y.finishedAt||'').localeCompare(x.finishedAt||'') || y.addedAt-x.addedAt);
+  else if(sortBy==='title') a.sort((x,y)=> (x.title||'').localeCompare(y.title||'','ja'));
+  else a.sort((x,y)=> y.addedAt-x.addedAt);
+  return a;
 }
 
 function renderShelf(){
-  renderStats();
-  const list = books.filter(b=> filter==='all' || b.status===filter);
+  // タグフィルタ表示
+  const tf = document.getElementById('tagFilter');
+  tf.classList.toggle('on', !!tagFilter);
+  if(tagFilter) document.getElementById('tagFilterName').textContent = tagFilter;
+
+  let list = books.filter(b=> filter==='all' || b.status===filter);
+  if(tagFilter) list = list.filter(b=> (b.tags||[]).includes(tagFilter));
+  if(searchText) list = list.filter(b=>{
+    const hay = [b.title, b.authors, (b.tags||[]).join(' '), b.note].join(' ').toLowerCase();
+    return hay.includes(searchText);
+  });
+  list = sortBooks(list);
+
   if(!list.length){
-    shelfList.innerHTML = `<div class="empty">${books.length? 'この条件の本はありません。':'まだ本がありません。<br>「本を追加」から登録してみましょう。'}</div>`;
+    shelfList.innerHTML = `<div class="empty">${books.length? '条件に合う本はありません。':'まだ本がありません。<br>「追加」タブから登録してみましょう。'}</div>`;
     return;
   }
-  shelfList.innerHTML = list.map(b=>{
-    const stars = [1,2,3,4,5].map(n=>`<span class="${n<=b.rating?'on':''}" onclick='setRating("${b.id}",${n})'>★</span>`).join('');
-    return `<div class="book">
-      ${coverHTML(b)}
-      <div class="info">
-        <span class="status-tag ${b.status}">${STATUS_LABEL[b.status]}</span>
-        <p class="title">${esc(b.title)}</p>
-        ${b.authors? `<p class="author">${esc(b.authors)}</p>`:''}
-        <div class="stars">${stars}</div>
-        <textarea class="note" placeholder="メモ・感想…" onchange='setNote("${b.id}", this.value)'>${esc(b.note||'')}</textarea>
-        <div class="row-actions">
-          <select class="status-select" onchange='setStatus("${b.id}", this.value)'>
-            <option value="want" ${b.status==='want'?'selected':''}>読みたい</option>
-            <option value="reading" ${b.status==='reading'?'selected':''}>読書中</option>
-            <option value="done" ${b.status==='done'?'selected':''}>読了</option>
-          </select>
-          <button class="mini del" onclick='delBook("${b.id}")'>削除</button>
-        </div>
+  shelfList.innerHTML = list.map(bookCard).join('');
+}
+
+function bookCard(b){
+  const stars = [1,2,3,4,5].map(n=>`<span class="${n<=b.rating?'on':''}" onclick='setRating("${b.id}",${n})'>★</span>`).join('');
+  const tags = (b.tags||[]).map(t=>
+    `<button class="tag" onclick='setTagFilter(${JSON.stringify(t)})'>${esc(t)}<span class="x" onclick='event.stopPropagation();removeTag("${b.id}",${JSON.stringify(t)})'>×</span></button>`
+  ).join('');
+  const pct = b.totalPages>0 ? Math.min(100, Math.round((b.currentPage/b.totalPages)*100)) : 0;
+  const progress = b.status==='reading' ? `
+    <div class="progress">
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="lbl">${b.currentPage||0} / ${b.totalPages||'?'} ページ${b.totalPages>0? '（'+pct+'%）':''}</div>
+    </div>` : '';
+
+  return `<div class="book">
+    ${coverHTML(b)}
+    <div class="info">
+      <span class="status-tag ${b.status}">${STATUS_LABEL[b.status]}</span>
+      <p class="title">${esc(b.title)}</p>
+      ${b.authors? `<p class="author">${esc(b.authors)}</p>`:''}
+      <div class="stars">${stars}</div>
+      ${progress}
+      <div class="tags">
+        ${tags}
+        <button class="tag add" onclick='addTag("${b.id}")'>＋タグ</button>
       </div>
-    </div>`;
-  }).join('');
+      <details class="rec">
+        <summary>読書記録</summary>
+        <div class="rec-grid">
+          <label>読み始め</label>
+          <input type="date" value="${b.startedAt||''}" onchange='setField("${b.id}","startedAt",this.value)'>
+          <label>読了日</label>
+          <input type="date" value="${b.finishedAt||''}" onchange='setField("${b.id}","finishedAt",this.value)'>
+          <label>ページ</label>
+          <div class="pages">
+            <input type="number" min="0" value="${b.currentPage||''}" placeholder="現在" onchange='setNum("${b.id}","currentPage",this.value)'>
+            <span>/</span>
+            <input type="number" min="0" value="${b.totalPages||''}" placeholder="総数" onchange='setNum("${b.id}","totalPages",this.value)'>
+          </div>
+        </div>
+        <textarea class="note" placeholder="メモ・感想…" onchange='setField("${b.id}","note",this.value)'>${esc(b.note||'')}</textarea>
+      </details>
+      <div class="row-actions">
+        <select class="status-select" onchange='setStatus("${b.id}", this.value)'>
+          <option value="want" ${b.status==='want'?'selected':''}>読みたい</option>
+          <option value="reading" ${b.status==='reading'?'selected':''}>読書中</option>
+          <option value="done" ${b.status==='done'?'selected':''}>読了</option>
+        </select>
+        <button class="mini del" onclick='delBook("${b.id}")'>削除</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 window.setStatus = (id, st)=>{
   const b = books.find(x=>x.id===id); if(!b) return;
-  b.status = st; if(st==='done' && !b.finishedAt) b.finishedAt = Date.now();
+  b.status = st;
+  if(st==='reading' && !b.startedAt) b.startedAt = today();
+  if(st==='done'){ if(!b.startedAt) b.startedAt = today(); if(!b.finishedAt) b.finishedAt = today(); }
   save(); renderShelf();
 };
 window.setRating = (id, n)=>{
   const b = books.find(x=>x.id===id); if(!b) return;
   b.rating = (b.rating===n)? 0 : n; save(); renderShelf();
 };
-window.setNote = (id, v)=>{ const b = books.find(x=>x.id===id); if(b){ b.note=v; save(); } };
+window.setField = (id, f, v)=>{ const b=books.find(x=>x.id===id); if(b){ b[f]=v; save(); if(f==='finishedAt') renderShelf(); } };
+window.setNum   = (id, f, v)=>{ const b=books.find(x=>x.id===id); if(b){ b[f]=parseInt(v,10)||0; save(); renderShelf(); } };
+window.addTag = (id)=>{
+  const b = books.find(x=>x.id===id); if(!b) return;
+  const t = (prompt('タグを入力（例：小説、ビジネス、お気に入り）')||'').trim();
+  if(!t) return;
+  if(!b.tags.includes(t)) b.tags.push(t);
+  save(); renderShelf();
+};
+window.removeTag = (id, t)=>{
+  const b = books.find(x=>x.id===id); if(!b) return;
+  b.tags = b.tags.filter(x=>x!==t); save(); renderShelf();
+};
 window.delBook = (id)=>{
   if(!confirm('この本を本棚から削除しますか？')) return;
   books = books.filter(x=>x.id!==id); save(); renderShelf(); toast('削除しました');
 };
 
+/* ============ 記録（統計）UI ============ */
+function renderStats(){
+  const done = books.filter(b=>b.status==='done');
+  const pages = done.reduce((s,b)=> s + (b.totalPages||0), 0);
+  const rated = books.filter(b=>b.rating>0);
+  const avg = rated.length ? (rated.reduce((s,b)=>s+b.rating,0)/rated.length).toFixed(1) : '–';
+  const thisYear = new Date().getFullYear();
+  const thisYearCount = done.filter(b=> (b.finishedAt||'').slice(0,4)===String(thisYear)).length;
+
+  document.getElementById('statCards').innerHTML = `
+    <div class="stat"><div class="n">${done.length}</div><div class="l">読了（累計）</div></div>
+    <div class="stat"><div class="n">${thisYearCount}</div><div class="l">今年の読了</div></div>
+    <div class="stat"><div class="n">${pages.toLocaleString()}</div><div class="l">読了ページ数</div></div>
+    <div class="stat"><div class="n">${avg}</div><div class="l">平均評価</div></div>`;
+
+  // 年間目標
+  const gpct = goal>0 ? Math.min(100, Math.round(thisYearCount/goal*100)) : 0;
+  document.getElementById('goalBox').innerHTML = `
+    <div class="row">
+      <span>${thisYear}年の目標：</span>
+      <input type="number" min="0" value="${goal||''}" placeholder="0" id="goalInput"> 冊
+      <span style="color:var(--sub)">（達成 ${thisYearCount} 冊）</span>
+    </div>
+    ${goal>0? `<div class="bar"><i style="width:${gpct}%"></i></div>
+      <div class="lbl" style="font-size:12px;color:var(--sub);margin-top:4px">${gpct}% 達成${thisYearCount>=goal?' 🎉':''}</div>`:''}`;
+  document.getElementById('goalInput').onchange = (e)=>{
+    goal = parseInt(e.target.value,10)||0; localStorage.setItem(GOAL_KEY, goal); renderStats();
+  };
+
+  // 年セレクタ
+  const years = [...new Set(done.map(b=>(b.finishedAt||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  if(!years.length) years.push(String(thisYear));
+  const ySel = document.getElementById('yearSel');
+  const cur = ySel.value && years.includes(ySel.value) ? ySel.value : years[0];
+  ySel.innerHTML = years.map(y=>`<option value="${y}" ${y===cur?'selected':''}>${y}年</option>`).join('');
+  ySel.onchange = renderChart;
+  renderChart();
+}
+
+function renderChart(){
+  const y = document.getElementById('yearSel').value;
+  const counts = new Array(12).fill(0);
+  books.filter(b=>b.status==='done' && (b.finishedAt||'').slice(0,4)===y)
+       .forEach(b=>{ const m = parseInt((b.finishedAt||'').slice(5,7),10); if(m>=1&&m<=12) counts[m-1]++; });
+  const max = Math.max(1, ...counts);
+  document.getElementById('chart').innerHTML = counts.map((c,i)=>`
+    <div class="col">
+      <div class="v">${c||''}</div>
+      <div class="b" style="height:${c/max*100}%"></div>
+      <div class="m">${i+1}</div>
+    </div>`).join('');
+}
+
 /* ============ タブ ============ */
 function switchTab(name){
   [...document.querySelectorAll('.tabs button')].forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
-  document.getElementById('panel-shelf').classList.toggle('active', name==='shelf');
-  document.getElementById('panel-add').classList.toggle('active', name==='add');
+  ['shelf','stats','add'].forEach(p=>document.getElementById('panel-'+p).classList.toggle('active', p===name));
+  if(name==='stats') renderStats();
 }
 document.querySelector('.tabs').addEventListener('click', e=>{
   const btn = e.target.closest('button'); if(btn) switchTab(btn.dataset.tab);
@@ -399,7 +607,6 @@ document.querySelector('.tabs').addEventListener('click', e=>{
 /* ============ バーコードスキャン ============ */
 let scanner = null;
 const scanModal = document.getElementById('scanModal');
-
 document.getElementById('scanBtn').onclick = startScan;
 document.getElementById('closeScan').onclick = stopScan;
 
@@ -408,12 +615,7 @@ async function startScan(){
   document.getElementById('scanCap').textContent = 'カメラを起動しています…';
   scanner = new Html5Qrcode('reader', { formatsToSupport:[ Html5QrcodeSupportedFormats.EAN_13 ] });
   try{
-    await scanner.start(
-      { facingMode:'environment' },
-      { fps:10, qrbox:{width:260, height:160} },
-      onScan,
-      ()=>{}
-    );
+    await scanner.start({ facingMode:'environment' }, { fps:10, qrbox:{width:260, height:160} }, onScan, ()=>{});
     document.getElementById('scanCap').textContent = '本の裏のバーコード（978…）を枠に合わせてください';
   }catch(e){
     document.getElementById('scanCap').textContent = 'カメラを使用できませんでした。権限を許可するか、検索をご利用ください。';
@@ -423,7 +625,7 @@ async function startScan(){
 let scanLock = false;
 async function onScan(text){
   if(scanLock) return;
-  if(!/^97[89]/.test(text)) return; // 書籍ISBNのみ
+  if(!/^97[89]/.test(text)) return;
   scanLock = true;
   document.getElementById('scanCap').textContent = '読み取りました：' + text + ' / 検索中…';
   await stopScan();
@@ -432,7 +634,7 @@ async function onScan(text){
   resultsEl.innerHTML = '<div class="loading">書籍情報を取得中…</div>';
   try{
     const b = await lookupISBN(text);
-    resultsEl.innerHTML = b ? cardHTML(b,true)
+    resultsEl.innerHTML = b ? resultCard(b)
       : '<div class="empty">この本の情報が見つかりませんでした。タイトルで検索してみてください。</div>';
   }catch(e){
     resultsEl.innerHTML = '<div class="empty">通信エラーが発生しました。</div>';
@@ -442,18 +644,16 @@ async function onScan(text){
 
 async function stopScan(){
   scanModal.classList.remove('open');
-  if(scanner){
-    try{ await scanner.stop(); scanner.clear(); }catch(e){}
-    scanner = null;
-  }
+  if(scanner){ try{ await scanner.stop(); scanner.clear(); }catch(e){} scanner = null; }
 }
 
 /* ============ バックアップ ============ */
 document.getElementById('exportBtn').onclick = ()=>{
-  const blob = new Blob([JSON.stringify(books,null,2)], {type:'application/json'});
+  const payload = { books, goal };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'books-' + new Date().toISOString().slice(0,10) + '.json';
+  a.download = 'books-' + today() + '.json';
   a.click();
 };
 document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
@@ -463,11 +663,15 @@ document.getElementById('importFile').onchange = (e)=>{
   r.onload = ()=>{
     try{
       const data = JSON.parse(r.result);
-      if(!Array.isArray(data)) throw 0;
+      const arr = Array.isArray(data) ? data : data.books;   // 旧形式(配列)も新形式({books,goal})も受ける
+      if(!Array.isArray(arr)) throw 0;
       const ids = new Set(books.map(b=>b.id));
       let added = 0;
-      data.forEach(b=>{ if(b.id && !ids.has(b.id)){ books.push(b); ids.add(b.id); added++; } });
-      save(); renderShelf();
+      arr.forEach(b=>{ if(b.id && !ids.has(b.id)){ books.push(b); ids.add(b.id); added++; } });
+      if(!Array.isArray(data) && data.goal && !goal){ goal = data.goal; localStorage.setItem(GOAL_KEY, goal); }
+      save();
+      books = load();      // 取り込んだ本に新フィールドを補完して正規化
+      renderShelf();
       toast(added + '冊を読み込みました');
     }catch(err){ toast('読み込みに失敗しました'); }
   };
@@ -477,10 +681,8 @@ document.getElementById('importFile').onchange = (e)=>{
 /* ============ ユーティリティ ============ */
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-/* 初期描画 */
 renderShelf();
 
-/* Service Worker（オフライン対応・ホーム追加） */
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
