@@ -1,0 +1,14 @@
+{
+  "name": "読書管理",
+  "short_name": "読書管理",
+  "description": "バーコードや検索で本を登録できる、スマホ向け読書管理アプリ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f3ee",
+  "theme_color": "#3b5b8c",
+  "lang": "ja",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
