@@ -301,10 +301,19 @@ async function lookupISBN(isbn){
     const d = await r.json();
     if(d && d[0] && d[0].summary){
       const s = d[0].summary;
+      let cover = s.cover || '';
+      let totalPages = 0;
+      // openBDは書影が無いことが多いので、無ければGoogle Booksから書影・ページ数を補完
+      if(!cover){
+        try{
+          const g = await searchGoogle('isbn:' + isbn);
+          if(g[0]){ cover = g[0].cover || ''; totalPages = g[0].totalPages || 0; }
+        }catch(e){}
+      }
       return {
         id: 'isbn:'+isbn, title: s.title || '(タイトル不明)',
         authors: cleanAuthor(s.author), publisher: s.publisher || '',
-        published: s.pubdate || '', cover: s.cover || '', isbn, totalPages: 0
+        published: s.pubdate || '', cover, isbn, totalPages
       };
     }
   }catch(e){}
@@ -370,10 +379,28 @@ async function doSearch(){
   }
 }
 
-function coverHTML(b){
-  if(b.cover) return `<img class="cover" src="${esc(b.cover)}" alt="" loading="lazy" onerror="this.replaceWith(noCover())">`;
-  return `<div class="cover">No<br>Image</div>`;
+// 書影は単一ソースだと欠けやすいので、複数ソースを順に試す（前のが404なら次へ）
+function coverCandidates(b){
+  const list = [];
+  if(b.cover) list.push(b.cover);
+  if(b.isbn){
+    const isbn = String(b.isbn).replace(/[^0-9Xx]/g,'');
+    if(isbn) list.push('https://covers.openlibrary.org/b/isbn/' + isbn + '-M.jpg?default=false');
+  }
+  return list;
 }
+function coverHTML(b){
+  const c = coverCandidates(b);
+  if(!c.length) return `<div class="cover">No<br>Image</div>`;
+  const fb = encodeURIComponent(JSON.stringify(c.slice(1)));
+  return `<img class="cover" src="${esc(c[0])}" data-fb="${fb}" alt="" onerror="coverErr(this)">`;
+}
+window.coverErr = function(img){
+  let fb = [];
+  try{ fb = JSON.parse(decodeURIComponent(img.dataset.fb || '%5B%5D')); }catch(e){}
+  if(fb.length){ const next = fb.shift(); img.dataset.fb = encodeURIComponent(JSON.stringify(fb)); img.src = next; }
+  else img.replaceWith(noCover());
+};
 function noCover(){ const d=document.createElement('div'); d.className='cover'; d.innerHTML='No<br>Image'; return d; }
 
 function resultCard(b){
