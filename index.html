@@ -438,22 +438,41 @@ async function doSearch(){
   }
 }
 
-// 書影は単一ソースだと欠けやすいので、複数ソースを順に試す（前のが404なら次へ）
+// ISBN13(978…) を ISBN10 に変換（Amazonの書影URLはISBN10指定のため）
+function toIsbn10(isbn){
+  const s = String(isbn||'').replace(/[^0-9Xx]/g,'');
+  if(s.length === 10) return s;
+  if(s.length === 13 && s.startsWith('978')){
+    const core = s.slice(3,12);
+    let sum = 0;
+    for(let i=0;i<9;i++) sum += (10-i) * parseInt(core[i],10);
+    const c = (11 - (sum % 11)) % 11;
+    return core + (c === 10 ? 'X' : c);
+  }
+  return null;
+}
+// 書影は単一ソースだと欠けやすいので、複数ソースを順に試す（前のが失敗なら次へ）
+// 日本語書籍はAmazonの書影CDNが最もヒットするので主に、次いでOpenLibrary。
 function coverCandidates(b){
   const list = [];
   if(b.cover) list.push(b.cover);
-  if(b.isbn){
-    const isbn = String(b.isbn).replace(/[^0-9Xx]/g,'');
-    if(isbn) list.push('https://covers.openlibrary.org/b/isbn/' + isbn + '-M.jpg?default=false');
-  }
+  const i10 = toIsbn10(b.isbn);
+  if(i10) list.push('https://images-na.ssl-images-amazon.com/images/P/' + i10 + '.01.LZZZZZZZ.jpg');
+  const isbn = String(b.isbn||'').replace(/[^0-9Xx]/g,'');
+  if(isbn) list.push('https://covers.openlibrary.org/b/isbn/' + isbn + '-M.jpg?default=false');
   return list;
 }
 function coverHTML(b){
   const c = coverCandidates(b);
   if(!c.length) return `<div class="cover">No<br>Image</div>`;
   const fb = encodeURIComponent(JSON.stringify(c.slice(1)));
-  return `<img class="cover" src="${esc(c[0])}" data-fb="${fb}" alt="" onerror="coverErr(this)">`;
+  return `<img class="cover" src="${esc(c[0])}" data-fb="${fb}" alt="" onload="coverLoad(this)" onerror="coverErr(this)">`;
 }
+// Amazonは書影が無いと1×1の空画像を返すので、極小サイズは「失敗」とみなして次へ送る
+window.coverLoad = function(img){
+  if(img.naturalWidth > 1) return;
+  coverErr(img);
+};
 window.coverErr = function(img){
   let fb = [];
   try{ fb = JSON.parse(decodeURIComponent(img.dataset.fb || '%5B%5D')); }catch(e){}

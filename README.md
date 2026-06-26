@@ -19,7 +19,8 @@
 - [openBD](https://openbd.jp/) … 日本の書籍の書誌（ISBN検索の主データ）
 - [Google Books API](https://developers.google.com/books) … タイトル・著者検索の主データ
 - [国立国会図書館サーチ](https://ndlsearch.ndl.go.jp/) … Google Booksが使えない時のタイトル・著者検索の予備
-- [Open Library Covers](https://openlibrary.org/dev/docs/api/covers) … 書影が無いときの予備
+- Amazon 書影CDN（ISBN10指定）… 書影の主データ（日本語書籍のヒット率が高い）
+- [Open Library Covers](https://openlibrary.org/dev/docs/api/covers) … 書影の予備
 - [html5-qrcode](https://github.com/mebjas/html5-qrcode) … バーコード読み取り
 
 ### 検索が「ほとんどヒットしない」場合について
